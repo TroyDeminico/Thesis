@@ -6,14 +6,22 @@
 //
 
 import SwiftUI
+import Firebase
 
 @main
 struct Multipage2App: App {
     @StateObject var exerciseModel = ExerciseModel()
+    @StateObject var viewModel = AuthViewModel()
+    
+    init() {
+        FirebaseApp.configure()
+    }
 
     var body: some Scene {
         WindowGroup {
-            ContentView(exerciseModel: exerciseModel)
+            AppEntryView()
+                .environmentObject(viewModel)
+                .environmentObject(exerciseModel)
         }
     }
 }

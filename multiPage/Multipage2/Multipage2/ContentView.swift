@@ -31,6 +31,8 @@ struct ContentView: View {
                             .foregroundColor(.blue)
                             .frame(maxWidth: .infinity, alignment: .center)
                             .padding(.bottom, 20)
+                        
+                
 
                         VStack(spacing: 15) {
                             // temo text field
@@ -54,7 +56,30 @@ struct ContentView: View {
                                 .padding(.horizontal)
                         }
                         .padding(.top, 20)
-                        Spacer() // pushes the content towards the center
+                        
+                        // Recent Workouts Section
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("Recent Workouts")
+                                .font(.title2)
+                                .fontWeight(.bold)
+                                .foregroundColor(.white)
+                                .padding(.top, 20)
+                            
+                            if exerciseModel.recentWorkouts.isEmpty {
+                                Text("No recent workouts")
+                                    .foregroundColor(.gray)
+                            } else {
+                                ForEach(exerciseModel.recentWorkouts.reversed()) { workout in
+                                    WorkoutBox(workout: workout)
+                                }
+                            }
+                        }
+                        .padding()
+                        .background(Color.white.opacity(0.2))
+                        .cornerRadius(12)
+                        .padding(.horizontal)
+
+                        Spacer() // Pushes content upwards
                     }
                 }
                 .tabItem {
@@ -70,13 +95,54 @@ struct ContentView: View {
                     }
                 LogWorkoutView(exerciseModel: exerciseModel)
                     .tabItem(){
-                        Image(systemName: "house.fill")
+                        Image(systemName: "eye")
+                        Text("View")
+                    }
+                LogView(exerciseModel: exerciseModel)
+                    .tabItem(){
+                        Image(systemName: "timer")
                         Text("Log")
                     }
+                ProfileView()
+                    .tabItem {
+                        Image(systemName:"person.crop.circle")
+                        Text("Profile")
+                        }
             }
         }
     }
 }
+
+
+struct WorkoutBox: View {
+    let workout: Exercise
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            Text(workout.name)
+                .font(.headline)
+                .foregroundColor(.white)
+            
+            if let date = workout.dateCompleted {
+                Text(date, style: .date) // Show date if available
+                    .font(.subheadline)
+                    .foregroundColor(.gray)
+            } else {
+                Text("Not completed yet") // Display alternative text
+                    .font(.subheadline)
+                    .foregroundColor(.red)
+            }
+            
+            Text("Sets: \(workout.sets) • Reps: \(workout.reps)")
+                .font(.body)
+                .foregroundColor(.white)
+        }
+        .padding()
+        .background(RoundedRectangle(cornerRadius: 12).fill(Color.blue.opacity(0.8)))
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
 
 #Preview {
     ContentView(exerciseModel: ExerciseModel())

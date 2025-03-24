@@ -15,11 +15,13 @@ struct Exercise: Identifiable {
     var image: Image
     var reps: Int = 10
     var sets: Int = 4
+    var dateCompleted: Date?
 }
 
 class ExerciseModel: ObservableObject {
     @Published var exercises: [Exercise] = []
     @Published var weeklyExercises: [String: [Exercise]] = [:] // map the days of the workout week to their exercises
+    @Published var recentWorkouts: [Exercise] = []
 
     func setupPlan(for days: Int) {
         // reset the weeklyExercises for the given number of days
@@ -30,4 +32,12 @@ class ExerciseModel: ObservableObject {
             dict[day] = []
         }
     }
+    
+    func addRecentWorkout(_ exercise: Exercise) {
+            if recentWorkouts.count >= 5 {
+                recentWorkouts.removeFirst() // keep only a list of 5
+            }
+            recentWorkouts.append(exercise)
+        }
+    
 }
