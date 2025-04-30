@@ -36,5 +36,13 @@ To run LiftLogger locally, the following components are required:
 5. Drag the file into the root of your Xcode project
 6. Ensure the following is called in `Multipage2App.swift`:
 
-```swift
-FirebaseApp.configure()
+---
+
+## Running the App
+
+1. Open the Project in XCode
+2. Wait for it to build
+3. Cmd + R
+4. Wait for the simulator to open
+
+
