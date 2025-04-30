@@ -8,142 +8,131 @@
 import SwiftUI
 
 struct ContentView: View {
+    @State private var hasFetchedExercises = false
     @State private var firstName: String = ""
     @State private var lastName: String = ""
     @ObservedObject var exerciseModel: ExerciseModel
+    @EnvironmentObject var viewModel: AuthViewModel
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             TabView {
                 // Home Page Content
                 ZStack {
-                    // background Image no image in currently
                     Image("dumbbells")
                         .resizable()
-                        .scaledToFill()
-                        .ignoresSafeArea() // image will fill screen
-
-                    VStack {
-                        // header is centered
-                        Text("Home Page")
-                            .font(.largeTitle)
-                            .fontWeight(.bold)
-                            .foregroundColor(.blue)
-                            .frame(maxWidth: .infinity, alignment: .center)
-                            .padding(.bottom, 20)
-                        
-                
-
-                        VStack(spacing: 15) {
-                            // temo text field
-                            TextField("First Name", text: $firstName)
-                                .padding()
-                                .background(Color.black.opacity(0.8))
-                                .foregroundColor(.white)
-                                .cornerRadius(10)
-                                .frame(maxWidth: 350)  // set max width for larger screens
-                                .frame(height: 60)
-                                .padding(.horizontal)
-                            
-                            // temp text field
-                            TextField("Last Name", text: $lastName)
-                                .padding()
-                                .background(Color.red.opacity(0.8))
-                                .foregroundColor(.white)
-                                .cornerRadius(10)
-                                .frame(maxWidth: 350)
-                                .frame(height: 60)
-                                .padding(.horizontal)
-                        }
-                        .padding(.top, 20)
-                        
-                        // Recent Workouts Section
-                        VStack(alignment: .leading, spacing: 10) {
-                            Text("Recent Workouts")
-                                .font(.title2)
+                        .aspectRatio(contentMode: .fit)
+                        .frame(maxHeight: .infinity)
+                        .ignoresSafeArea()
+                    ScrollView {
+                        VStack(spacing: 20) {
+                            Text("Home Page")
+                                .font(.largeTitle)
                                 .fontWeight(.bold)
-                                .foregroundColor(.white)
-                                .padding(.top, 20)
-                            
-                            if exerciseModel.recentWorkouts.isEmpty {
-                                Text("No recent workouts")
-                                    .foregroundColor(.gray)
-                            } else {
-                                ForEach(exerciseModel.recentWorkouts.reversed()) { workout in
-                                    WorkoutBox(workout: workout)
+                                .foregroundColor(.black)
+                                .overlay(
+                                    Text("Home Page")
+                                        .font(.largeTitle)
+                                        .fontWeight(.bold)
+                                        .foregroundColor(.green)
+                                        .offset(x: 1, y: 1)
+                                )
+                                .padding(.top, 60)
+
+                            VStack(alignment: .leading, spacing: 10) {
+                                // completed day section
+                                Text("Completed Days")
+                                    .font(.title2)
+                                    .fontWeight(.bold)
+                                    .foregroundColor(.white)
+
+                                if exerciseModel.completedDaysHistory.isEmpty {
+                                    Text("No days completed yet.")
+                                        .foregroundColor(.white)
+                                } else {
+                                    // show the exercises (days) done
+                                    ForEach(Array(exerciseModel.completedDaysHistory.enumerated().reversed()), id: \.offset) { index, entry in
+                                        let (day, exercises) = entry
+                                        // let them be clicked on to see details
+                                        NavigationLink(destination: CompletedDayDetailView(day: day, exercises: exercises)) {
+                                            Text("\(day) Completed")
+                                                .fontWeight(.bold)
+                                                .frame(maxWidth: .infinity)
+                                                .padding()
+                                                .background(Color.green.opacity(0.7))
+                                                .foregroundColor(.white)
+                                                .cornerRadius(10)
+                                        }
+                                    }
                                 }
                             }
-                        }
-                        .padding()
-                        .background(Color.white.opacity(0.2))
-                        .cornerRadius(12)
-                        .padding(.horizontal)
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .background(Color.white.opacity(0.2))
+                            .cornerRadius(12)
+                            .padding(.horizontal)
 
-                        Spacer() // Pushes content upwards
+                            Spacer(minLength: 60)
+                        }
+                        .padding(.bottom, 30)
+                        .frame(maxWidth: .infinity)
                     }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity) // full screen
                 }
                 .tabItem {
                     Image(systemName: "house.fill")
                     Text("Home")
                 }
 
+                // navigation
                 // ViewThree Tab
                 ViewThree(exerciseModel: exerciseModel)
                     .tabItem {
                         Image(systemName: "plus.circle.fill")
                         Text("Create")
                     }
-                LogWorkoutView(exerciseModel: exerciseModel)
-                    .tabItem(){
-                        Image(systemName: "eye")
-                        Text("View")
-                    }
+                // Log Tab
                 LogView(exerciseModel: exerciseModel)
                     .tabItem(){
                         Image(systemName: "timer")
-                        Text("Log")
+                        Text("Log Workout")
                     }
+                // Calendar Tab
+                WorkoutCalendarView(exerciseModel: exerciseModel)
+                    .tabItem(){
+                        Image(systemName: "calendar")
+                        Text("Calendar")
+                    }
+                // Profile Tab
                 ProfileView()
                     .tabItem {
                         Image(systemName:"person.crop.circle")
                         Text("Profile")
+                    }
+            }
+            .onChange(of: viewModel.userSession) { session in
+                if session != nil && !hasFetchedExercises {
+                    Task {
+                        await exerciseModel.fetchWorkoutPlanFromFirebase()
+                        // Update completedDaysHistory after fetching the plan
+                        exerciseModel.completedDaysHistory = exerciseModel.weeklyExercises.compactMap { (day, exercises) in
+                            let completed = exercises.filter { $0.dateCompleted != nil }
+                            return completed.isEmpty ? nil : (day, completed)
                         }
+                        hasFetchedExercises = true
+                    }
+                } else if session == nil {
+                    hasFetchedExercises = false // Reset the flag on sign out
+                    exerciseModel.completedDaysHistory = [] // Clear history on sign out
+                }
             }
         }
     }
 }
-
-
-struct WorkoutBox: View {
-    let workout: Exercise
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 5) {
-            Text(workout.name)
-                .font(.headline)
-                .foregroundColor(.white)
-            
-            if let date = workout.dateCompleted {
-                Text(date, style: .date) // Show date if available
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
-            } else {
-                Text("Not completed yet") // Display alternative text
-                    .font(.subheadline)
-                    .foregroundColor(.red)
-            }
-            
-            Text("Sets: \(workout.sets) • Reps: \(workout.reps)")
-                .font(.body)
-                .foregroundColor(.white)
-        }
-        .padding()
-        .background(RoundedRectangle(cornerRadius: 12).fill(Color.blue.opacity(0.8)))
-        .frame(maxWidth: .infinity, alignment: .leading)
-    }
-}
-
 
 #Preview {
-    ContentView(exerciseModel: ExerciseModel())
+    let mockAuth = AuthViewModel()
+    mockAuth.isAuthenticated = true
+    return ContentView(exerciseModel: ExerciseModel())
+        .environmentObject(mockAuth)
 }

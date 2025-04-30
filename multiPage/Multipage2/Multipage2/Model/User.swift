@@ -7,6 +7,7 @@
 
 import Foundation
 
+// user for the app 
 struct User: Identifiable, Codable {
     let id: String
     let fullname: String
@@ -24,6 +25,7 @@ struct User: Identifiable, Codable {
 }
 
 extension User {
+    // test user
     static var Mock_U = User(id: NSUUID().uuidString, fullname: "Troy Dem", email: "troydem@gmail.com")
 }
 

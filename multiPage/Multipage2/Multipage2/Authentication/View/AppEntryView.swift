@@ -10,18 +10,18 @@ import SwiftUI
 struct AppEntryView: View {
     @EnvironmentObject var viewModel: AuthViewModel
     @EnvironmentObject var exerciseModel: ExerciseModel
-    
+
     var body: some View {
         if viewModel.isAuthenticated || viewModel.userSession != nil {
-            ContentView(exerciseModel: ExerciseModel())
+            ContentView(exerciseModel: exerciseModel) // pass the injected instance
         } else {
             LoginView()
         }
     }
 }
 
-
 #Preview {
     AppEntryView()
-            .environmentObject(AuthViewModel())
+        .environmentObject(AuthViewModel())
+        .environmentObject(ExerciseModel())
 }

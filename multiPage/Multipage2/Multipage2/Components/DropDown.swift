@@ -1,14 +1,15 @@
 import SwiftUI
 
 // followed a tutorial for this code
+// creates a dropdown component to be easily reused throughout my code
 struct DropDown: View {
     let title: String
     let prompt: String
     let options: [String]
-    let width: CGFloat // New width parameter
+    let width: CGFloat 
     
     @State private var isExpanded = false
-    @Binding var selection: String? // `@Binding` variable
+    @Binding var selection: String?
 
     var body: some View {
         VStack(alignment: .leading) {

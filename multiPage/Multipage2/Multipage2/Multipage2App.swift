@@ -11,10 +11,13 @@ import Firebase
 @main
 struct Multipage2App: App {
     @StateObject var exerciseModel = ExerciseModel()
-    @StateObject var viewModel = AuthViewModel()
-    
+    @StateObject var viewModel: AuthViewModel
+
     init() {
         FirebaseApp.configure()
+        let model = ExerciseModel()
+        _exerciseModel = StateObject(wrappedValue: model)
+        _viewModel = StateObject(wrappedValue: AuthViewModel(exerciseModel: model))
     }
 
     var body: some Scene {

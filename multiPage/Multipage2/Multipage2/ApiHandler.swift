@@ -5,7 +5,6 @@
 //  Created by Troy Deminico on 11/11/24.
 //
 
-// ApiHandler.swift
 import Foundation
 struct ExerciseData: Identifiable {
     var id = UUID()
@@ -35,9 +34,11 @@ class ApiHandler {
                     let exercises = json.compactMap { item -> ExerciseData? in
                         guard let name = item["name"] as? String,
                               let instructions = item["instructions"] as? String else { return nil }
+                        // what the api gives back for each exercise
                         return ExerciseData(name: name, instructions: instructions)
                     }
                     DispatchQueue.main.async {
+                        // list of exercises
                         completion(exercises)
                     }
                 }

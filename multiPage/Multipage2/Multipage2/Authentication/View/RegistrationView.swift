@@ -4,6 +4,7 @@
 //
 //  Created by Troy Deminico on 2/13/25.
 //
+// followed a tutorial to help with this 
 
 import SwiftUI
 
@@ -25,6 +26,7 @@ struct RegistrationView: View {
                 .padding(.vertical, 32)
             
             VStack(spacing: 24){
+                // where user enters their info
                 InputView(text: $email,
                           title: "Email Address",
                           placeholder: "Name@Example.com")
@@ -46,6 +48,7 @@ struct RegistrationView: View {
                               placeholder: "Confirm Password here",
                               isSecureField: true)
                     
+                    // check for password
                     if !confirmpassword.isEmpty && !password.isEmpty && password.count > 5 {
                         if password == confirmpassword {
                             Image(systemName: "checkmark.circle.fill")

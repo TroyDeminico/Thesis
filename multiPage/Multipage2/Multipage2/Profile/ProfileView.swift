@@ -4,11 +4,14 @@
 //
 //  Created by Troy Deminico on 2/13/25.
 //
+// followed a tutorial to help with this
 
 import SwiftUI
 
+
 struct ProfileView: View {
     @EnvironmentObject var viewModel: AuthViewModel
+    @State private var navigateToWorkoutPlan = false
     var body: some View {
         if let user = viewModel.currentUser{
             List {
@@ -23,6 +26,7 @@ struct ProfileView: View {
                             .clipShape(Circle())
                         
                         VStack(alignment: .leading, spacing: 4){
+                            // displays the users info
                             Text(user.fullname)
                                 .font(.subheadline)
                                 .fontWeight(.semibold)
@@ -45,6 +49,18 @@ struct ProfileView: View {
                     }
                 }
                 
+                // lets the user view their plan 
+                Section("View Plan") {
+                    NavigationLink(
+                        destination: LogWorkoutView(exerciseModel: ExerciseModel())
+                            .environmentObject(viewModel)
+                    ) {
+                        SettingsRowView(imageName: "arrow.left.circle.fill", title: "View Plan", tintColor: .green)
+                    }
+                }
+                
+
+                
                 Section("Account"){
                     Button{
                         viewModel.signOut()
@@ -60,10 +76,27 @@ struct ProfileView: View {
                     
                 }
             }
+        } else {
+            // incase in app without being signed in
+            VStack {
+                Spacer()
+                Text("No user logged in")
+                    .foregroundColor(.gray)
+                    .font(.headline)
+                Spacer()
+                Section("Account"){
+                    Button{
+                        viewModel.signOut()
+                    }label:{
+                        SettingsRowView(imageName: "arrow.left.circle.fill", title: "Sign Out", tintColor: .red)
+                    }
+                }
+            }
         }
     }
 }
 
 #Preview {
     ProfileView()
+        .environmentObject(AuthViewModel())
 }
