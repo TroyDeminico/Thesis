@@ -35,6 +35,28 @@ To run LiftLogger locally, the following components are required:
 4. Download the `GoogleService-Info.plist` file
 5. Drag the file into the root of your Xcode project
 6. Ensure the following is called in `Multipage2App.swift`:
+import Firebase
+
+@main
+struct Multipage2App: App {
+    @StateObject var exerciseModel = ExerciseModel()
+    @StateObject var viewModel: AuthViewModel
+
+    init() {
+        FirebaseApp.configure()
+        let model = ExerciseModel()
+        _exerciseModel = StateObject(wrappedValue: model)
+        _viewModel = StateObject(wrappedValue: AuthViewModel(exerciseModel: model))
+    }
+
+    var body: some Scene {
+        WindowGroup {
+            AppEntryView()
+                .environmentObject(viewModel)
+                .environmentObject(exerciseModel)
+        }
+    }
+}
 
 ---
 
