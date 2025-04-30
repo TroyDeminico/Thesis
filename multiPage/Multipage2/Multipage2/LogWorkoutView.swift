@@ -71,16 +71,6 @@ struct LogWorkoutView: View {
         }
         .navigationTitle("Workout Plan")
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                Button {
-                    dismiss()
-                } label: {
-                    Label("Back", systemImage: "chevron.left")
-                        .labelStyle(TitleOnlyLabelStyle())
-                }
-            }
-        }
         .onAppear {
             Task {
                 await exerciseModel.fetchWorkoutPlanFromFirebase()
